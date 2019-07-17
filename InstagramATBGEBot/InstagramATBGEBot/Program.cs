@@ -10,7 +10,7 @@ namespace InstagramATBGEBot
     {
         static void Main(string[] args)
         {
-            // it begins
+            
         }
     }
 }
