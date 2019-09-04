@@ -17,6 +17,7 @@ using InstaSharper.Logger;
 using System;
 using System.IO;
 using InstaSharper.Classes.Models;
+using System.Threading;
 
 namespace InstagramATBGEBot
 {
@@ -63,6 +64,7 @@ namespace InstagramATBGEBot
                 user.UserName = username;
                 user.Password = password;
                 Login();
+                Thread.Sleep(3000);
 
                 UploadPics(topToday);
 
@@ -86,12 +88,30 @@ namespace InstagramATBGEBot
         public static async void UploadPics(Rootobject pics)
         {
             int picsAmnt = (int)pics.data.children.GetLongLength(0);
+            int width = 0;
+            int height = 0;
+
             for (int i = 0; i < picsAmnt; i++)
             {
-                InstaImage img = new InstaImage();
+
+                WebRequest request = WebRequest.Create(pics.data.children[i].data.url);
+                WebResponse response = request.GetResponse();
+                System.IO.Stream responseStream =
+                    response.GetResponseStream();
+                Bitmap photo = new Bitmap(responseStream);
+                width = photo.Width;
+                height = photo.Height;
+
+                photo.Save("exampleSaved1" + ".jpg", ImageFormat.Jpeg); // to debug local files saved
+                //InstaImage img = new InstaImage(pics.data.children[i].data.url, width, height);
+                InstaImage img = new InstaImage(@"C:\Users\ttrub\Desktop\InstagramATBGEBot\InstagramATBGEBot\InstagramATBGEBot\bin\Debug\exampleSaved1.jpg",
+                    width, height);
+                
+                var result = await api.UploadPhotoAsync(img, "Uploaded by: " + 
+                    pics.data.children[i].data.author + "; " +
+                    pics.data.children[i].data.title);
+
             }
-            
-            var result = await api.UploadPhotoAsync(photos[0], "caption");
 
         }
 
